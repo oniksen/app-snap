@@ -3,7 +3,6 @@ package dev.oniksen.app_snap.data.repository
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import dev.oniksen.app_snap.data.local.AppsDataBase
@@ -11,6 +10,7 @@ import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.domain.repository.AppsScanRepository
 import dev.oniksen.app_snap.presentation.activity.byteArrayToHex
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
@@ -29,7 +29,7 @@ class AppsScanRepositoryImpl(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun fetchAppsInfo(
+    override suspend fun scanApps(
         onProgress: (Int) -> Unit
     ) {
         val dao = db.appsDao()
@@ -89,6 +89,8 @@ class AppsScanRepositoryImpl(
             )
         }
     }
+
+    override fun fetchAppsInfo(): Flow<List<AppInfo>> = db.appsDao().getApps()
 
     private fun File.calculateSha256(): String {
         val md = MessageDigest.getInstance("SHA-256")

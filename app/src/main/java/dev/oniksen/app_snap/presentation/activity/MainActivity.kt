@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,52 +18,47 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.room.Room
+import dagger.hilt.android.AndroidEntryPoint
 import dev.oniksen.app_snap.data.local.AppsDataBase
 import dev.oniksen.app_snap.data.repository.AppsScanRepositoryImpl
+import dev.oniksen.app_snap.domain.model.AppInfo
+import dev.oniksen.app_snap.presentation.pages.app_list.AppListPage
 import dev.oniksen.app_snap.presentation.theme.AppSnapTheme
 import dev.oniksen.app_snap.presentation.theme.bodyFontFamily
-import kotlinx.coroutines.launch
+import dev.oniksen.app_snap.presentation.viewmodel.AppsViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 import java.io.FileInputStream
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import kotlin.experimental.and
+import kotlin.getValue
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    val appsViewModel by viewModels<AppsViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val db = Room.databaseBuilder(
-            context = applicationContext,
-            klass = AppsDataBase::class.java,
-            name = "apps_database"
-        )
-
-            .build()
-
-        // searchAllAppsAndApkChecksum(context = applicationContext)
-
         setContent {
             AppSnapTheme {
 
-                LaunchedEffect(Unit) {
-                    AppsScanRepositoryImpl(applicationContext, db).let {
-                        it.fetchAppsInfo { progress ->
-                            Log.d("MainActivity", "progress: $progress")
-                        }
-                    }
-                }
+                val appListState by appsViewModel.appListState.collectAsStateWithLifecycle()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding),
+                    AppListPage(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = innerPadding.calculateTopPadding()),
+                        apps = appListState,
                     )
                 }
             }
