@@ -1,4 +1,4 @@
-package dev.oniksen.app_snap.ui.theme
+package dev.oniksen.app_snap.presentation.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import dev.oniksen.app_snap.ui.theme.AppTypography
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -271,7 +270,7 @@ fun AppSnapTheme(
 
   MaterialTheme(
     colorScheme = colorScheme,
-    typography = dev.oniksen.app_snap.ui.theme.AppTypography,
+    typography = AppTypography,
     content = content
   )
 }
