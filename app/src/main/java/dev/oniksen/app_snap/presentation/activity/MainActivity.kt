@@ -16,11 +16,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
+import dev.oniksen.app_snap.data.local.AppsDataBase
+import dev.oniksen.app_snap.data.repository.AppsScanRepositoryImpl
 import dev.oniksen.app_snap.presentation.theme.AppSnapTheme
 import dev.oniksen.app_snap.presentation.theme.bodyFontFamily
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.security.DigestInputStream
@@ -32,10 +38,27 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        searchAllAppsAndApkChecksum(context = applicationContext)
+        val db = Room.databaseBuilder(
+            context = applicationContext,
+            klass = AppsDataBase::class.java,
+            name = "apps_database"
+        )
+
+            .build()
+
+        // searchAllAppsAndApkChecksum(context = applicationContext)
 
         setContent {
             AppSnapTheme {
+
+                LaunchedEffect(Unit) {
+                    AppsScanRepositoryImpl(applicationContext, db).let {
+                        it.fetchAppsInfo { progress ->
+                            Log.d("MainActivity", "progress: $progress")
+                        }
+                    }
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "Android",
