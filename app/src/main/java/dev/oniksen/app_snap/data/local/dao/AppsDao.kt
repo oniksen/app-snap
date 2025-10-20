@@ -15,4 +15,7 @@ interface AppsDao {
 
     @Query("SELECT * FROM AppInfo")
     fun getApps(): Flow<List<AppInfo>>
+
+    @Query("SELECT COUNT(*) FROM AppInfo")
+    fun getCachedAppsCount(): Int
 }

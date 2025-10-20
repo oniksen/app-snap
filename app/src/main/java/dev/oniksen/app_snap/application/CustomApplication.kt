@@ -1,4 +1,4 @@
-package dev.oniksen.app_snap.presentation
+package dev.oniksen.app_snap.application
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

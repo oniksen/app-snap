@@ -14,4 +14,9 @@ interface AppsScanRepository {
      * Получить список кэшированных приложений.
      * */
     fun fetchAppsInfo(): Flow<List<AppInfo>>
+
+    /**
+     * Напрямую получить список кэшированных приложений.
+     * */
+    suspend fun getCachedAppsCount(): Int
 }

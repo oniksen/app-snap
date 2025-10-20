@@ -36,7 +36,7 @@
     </queries>
 
     <application
-        android:name=".presentation.CustomApplication"
+        android:name=".application.CustomApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

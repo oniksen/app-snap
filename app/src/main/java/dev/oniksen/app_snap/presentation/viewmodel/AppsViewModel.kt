@@ -9,6 +9,7 @@ import dev.oniksen.app_snap.presentation.viewmodel.contract.AppsViewModelContrac
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,10 +26,18 @@ class AppsViewModel @Inject constructor(
     )
     override val appListState = _appListState
 
-    override fun scanApps() {
+    override fun rescanApps() {
         viewModelScope.launch {
             appsScanRepository.scanApps { progress ->
                 // TODO("Эмитить прогресс в ui flow")
+            }
+        }
+    }
+
+    override fun scanIfNeed() {
+        viewModelScope.launch {
+            if (appsScanRepository.getCachedAppsCount() == 0) {
+                rescanApps()
             }
         }
     }

@@ -1,5 +1,8 @@
 package dev.oniksen.app_snap.presentation.pages.app_list
 
+import android.content.pm.PackageManager
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -11,10 +14,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil3.compose.rememberAsyncImagePainter
 import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.utils.previewApps
+import java.io.File
 
 @Composable
 fun AppListPage(
@@ -23,7 +30,7 @@ fun AppListPage(
 ) {
 
     LazyColumn(modifier = modifier) {
-        items(apps) { appInfo ->
+        items(apps, key = { appInfo -> appInfo.uuid }) { appInfo ->
             ListItem(
                 headlineContent = {
                     Text(text = appInfo.appName)
@@ -32,10 +39,13 @@ fun AppListPage(
                     Text(text = appInfo.packageName)
                 },
                 leadingContent = {
-                    /*Icon(
-                        painter = painterResource(appInfo.iconResId),
-                        contentDescription = "App icon",
-                    )*/
+                    appInfo.iconFilePath?.let { iconPath ->
+                        Image(
+                            modifier = Modifier.size(48.dp),
+                            painter = rememberAsyncImagePainter(File(appInfo.iconFilePath)),
+                            contentDescription = "App icon",
+                        )
+                    }
                 }
             )
         }

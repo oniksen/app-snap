@@ -7,5 +7,7 @@ interface AppsViewModelContract {
 
     val appListState: StateFlow<List<AppInfo>>
 
-    fun scanApps()
+    fun rescanApps()
+
+    fun scanIfNeed()
 }

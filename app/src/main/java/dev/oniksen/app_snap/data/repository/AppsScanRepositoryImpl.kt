@@ -3,8 +3,11 @@ package dev.oniksen.app_snap.data.repository
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
+import androidx.core.graphics.drawable.toBitmap
 import dev.oniksen.app_snap.data.local.AppsDataBase
 import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.domain.repository.AppsScanRepository
@@ -14,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import kotlin.math.roundToInt
@@ -62,6 +66,13 @@ class AppsScanRepositoryImpl(
                             val checksum = file.calculateSha256()
                             Log.d(TAG, "fetchAppsInfo: checksum: $checksum")
 
+                            val icon = pm.getApplicationIcon(appInfo.packageName)
+                            val iconPath = saveAppIconToCache(
+                                context = context,
+                                packageName = appInfo.packageName,
+                                drawable = icon,
+                            )
+
                             // Кэширование полученной суммы.
                             withContext(Dispatchers.IO) {
                                 dao.insert(
@@ -70,7 +81,7 @@ class AppsScanRepositoryImpl(
                                         packageName = appInfo.packageName,
                                         appName = appInfo.loadLabel(pm).toString(),
                                         hashSum = checksum,
-                                        iconResId = appInfo.icon,
+                                        iconFilePath = iconPath,
                                     )
                                 )
                             }
@@ -92,6 +103,11 @@ class AppsScanRepositoryImpl(
 
     override fun fetchAppsInfo(): Flow<List<AppInfo>> = db.appsDao().getApps()
 
+    override suspend fun getCachedAppsCount(): Int {
+        val dao = db.appsDao()
+        return withContext(Dispatchers.IO) { dao.getCachedAppsCount() }
+    }
+
     private fun File.calculateSha256(): String {
         val md = MessageDigest.getInstance("SHA-256")
 
@@ -103,6 +119,25 @@ class AppsScanRepositoryImpl(
         }
 
         return byteArrayToHex(md.digest())
+    }
+
+    private fun saveAppIconToCache(context: Context, packageName: String, drawable: Drawable): String? {
+        return try {
+            // Преобразование Drawable в Bitmap
+            val bitmap = drawable.toBitmap()
+            // Создаём файл в кэше
+            val file = File(context.filesDir, "icons/$packageName.png")
+            file.parentFile?.mkdir()
+            // Сохраняем Bitmap в файл
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+
+            file.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     companion object {

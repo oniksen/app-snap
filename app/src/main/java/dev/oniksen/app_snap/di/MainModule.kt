@@ -14,7 +14,7 @@ import dev.oniksen.app_snap.domain.repository.AppsScanRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
-object MainModule {
+class MainModule {
 
     @Provides
     fun provideScanRepo(
@@ -25,7 +25,9 @@ object MainModule {
             context = context,
             klass = AppsDataBase::class.java,
             name = "apps_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration(true)
+            .build()
 
         return AppsScanRepositoryImpl(
             context = context,

@@ -10,29 +10,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.room.Room
 import dagger.hilt.android.AndroidEntryPoint
-import dev.oniksen.app_snap.data.local.AppsDataBase
-import dev.oniksen.app_snap.data.repository.AppsScanRepositoryImpl
-import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.presentation.pages.app_list.AppListPage
 import dev.oniksen.app_snap.presentation.theme.AppSnapTheme
-import dev.oniksen.app_snap.presentation.theme.bodyFontFamily
 import dev.oniksen.app_snap.presentation.viewmodel.AppsViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 import java.io.FileInputStream
 import java.security.DigestInputStream
@@ -53,6 +41,10 @@ class MainActivity : ComponentActivity() {
 
                 val appListState by appsViewModel.appListState.collectAsStateWithLifecycle()
 
+                LaunchedEffect(Unit) {
+                    appsViewModel.scanIfNeed()
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppListPage(
                         modifier = Modifier
@@ -63,21 +55,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "Test on english и русскомьъ",
-            modifier = modifier,
-            style = MaterialTheme.typography.headlineLarge,
-            fontFamily = bodyFontFamily,
-        )
     }
 }
 
@@ -138,13 +115,5 @@ private fun searchAllAppsAndApkChecksum(context: Context) {
         } catch (e: Exception) {
             Log.e("search", "Error getting APK for $pkg: ${e.message}", e)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AppSnapTheme {
-        Greeting("Android")
     }
 }

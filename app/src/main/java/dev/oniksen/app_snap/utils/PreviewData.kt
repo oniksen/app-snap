@@ -1,6 +1,5 @@
 package dev.oniksen.app_snap.utils
 
-import dev.oniksen.app_snap.R
 import dev.oniksen.app_snap.domain.model.AppInfo
 
 val previewApps = listOf(
@@ -9,34 +8,34 @@ val previewApps = listOf(
         packageName = "com.example.calendar",
         appName = "Календарь",
         hashSum = "abc123",
-        iconResId = R.drawable.ic_launcher_foreground
+        iconFilePath = "",
     ),
     AppInfo(
         uuid = "2b3c4d5e",
         packageName = "com.example.camera",
         appName = "Камера",
         hashSum = "def456",
-        iconResId = R.drawable.ic_launcher_foreground
+         iconFilePath = "",
     ),
     AppInfo(
         uuid = "3c4d5e6f",
         packageName = "com.example.music",
         appName = "Музыка",
         hashSum = "ghi789",
-        iconResId = R.drawable.ic_launcher_foreground
+         iconFilePath = "",
     ),
     AppInfo(
         uuid = "4d5e6f7g",
         packageName = "com.example.notes",
         appName = "Заметки",
         hashSum = "jkl012",
-        iconResId = R.drawable.ic_launcher_foreground
+         iconFilePath = "",
     ),
     AppInfo(
         uuid = "5e6f7g8h",
         packageName = "com.example.browser",
         appName = "Браузер",
         hashSum = "mno345",
-        iconResId = R.drawable.ic_launcher_foreground
+         iconFilePath = "",
     )
 )
