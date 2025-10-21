@@ -4,6 +4,7 @@ import dev.oniksen.app_snap.domain.model.AppInfo
 import kotlinx.coroutines.flow.StateFlow
 
 interface AppsViewModelContract {
+    val appsListIsRefreshing: StateFlow<Boolean>
 
     val appListState: StateFlow<List<AppInfo>>
 

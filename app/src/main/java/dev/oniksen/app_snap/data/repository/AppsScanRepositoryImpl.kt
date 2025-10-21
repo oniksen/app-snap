@@ -13,8 +13,11 @@ import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.domain.repository.AppsScanRepository
 import dev.oniksen.app_snap.presentation.activity.byteArrayToHex
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
+import okio.HashingSink.Companion.sha256
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -32,10 +35,14 @@ class AppsScanRepositoryImpl(
         addCategory(Intent.CATEGORY_LAUNCHER)
     }
 
+    /**
+     * Весь тяжелый код выполняется в Dispatchers.IO (в withContext).
+     * Сначала собираем results в памяти, потом один insertAll — Room сработает один раз → одна эмиссия.
+     * Мы сохраняем иконку только если checksum изменился или записи не было.
+     * Используем packageName как стабильный PK.
+     * */
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun scanApps(
-        onProgress: (Int) -> Unit
-    ) {
+    override suspend fun scanApps(onProgress: (Int) -> Unit) = withContext(Dispatchers.IO) {
         val dao = db.appsDao()
         val pm = context.packageManager
 
@@ -45,63 +52,64 @@ class AppsScanRepositoryImpl(
             pm.queryIntentActivities(getAppsWithIconsIntent, 0)
         }
 
+        val result = mutableListOf<AppInfo>()
         var procesedApps = 0
 
         for (info in resolveInfo) {
             try {
-                val appPaths = mutableListOf<String>()
-
                 val appInfo = pm.getApplicationInfo(info.activityInfo.packageName, 0)
+                val packageName = appInfo.packageName
 
-                // Получаем базовый путь apk
-                appInfo.sourceDir?.let { appPaths.add(it) }
-                // Получаем так же и дополнительные пути файлов приложения
-                appInfo.splitSourceDirs?.let { splitDirs ->
-                    appPaths.addAll(splitDirs)
+                val appPaths = mutableListOf<String>()
+                appInfo.sourceDir?.let { appPaths.add(it) } // Получаем базовый путь apk
+                appInfo.splitSourceDirs?.let { splitDirs -> appPaths.addAll(splitDirs) }    // Получаем так же и дополнительные пути файлов приложения
+
+                // вычисляем контрольную сумму по всем apk файлам приложения (конкатенируем)
+                val combinedHash = computeCombinedSha256OfFiles(appPaths)
+
+                // Если не удалось посчитать, то пропускаем.
+                if (combinedHash == null) {
+                    onProgress((++procesedApps / resolveInfo.size.toFloat() * 100).roundToInt())
+                    continue
                 }
 
-                for (path in appPaths) {
-                    File(path).let { file ->
-                        if (file.exists()) {
-                            val checksum = file.calculateSha256()
-                            Log.d(TAG, "fetchAppsInfo: checksum: $checksum")
+                // Проверка кэша. Если hash не изменился, то ропускаем пересохранение иконки.
+                val existingHash = dao.getHashSumFor(packageName)
+                val needSaveIcon = existingHash == null || existingHash != combinedHash
 
-                            val icon = pm.getApplicationIcon(appInfo.packageName)
-                            val iconPath = saveAppIconToCache(
-                                context = context,
-                                packageName = appInfo.packageName,
-                                drawable = icon,
-                            )
-
-                            // Кэширование полученной суммы.
-                            withContext(Dispatchers.IO) {
-                                dao.insert(
-                                    AppInfo(
-                                        uuid = Uuid.random().toHexString(),
-                                        packageName = appInfo.packageName,
-                                        appName = appInfo.loadLabel(pm).toString(),
-                                        hashSum = checksum,
-                                        iconFilePath = iconPath,
-                                    )
-                                )
-                            }
-                        } else {
-                            // TODO("Действие при отсутствии файла")
-                        }
-                    }
+                val iconPath = if (needSaveIcon) {
+                    val icon = pm.getApplicationIcon(packageName)
+                    saveAppIconToCache(
+                        context = context,
+                        packageName = packageName,
+                        drawable = icon,
+                    )
+                } else {
+                    // получить существующий путь из БД (можно получить через отдельный запрос или хранить map заранее)
+                    // для упрощения, мы попытаемся прочитать из БД; если null, то пересохраним.
+                    null
                 }
+
+                val appName = appInfo.loadLabel(pm).toString()
+                result += AppInfo(
+                    packageName = packageName,
+                    appName = appName,
+                    hashSum = combinedHash,
+                    iconFilePath = iconPath ?: dao.getIconPathFor(packageName)
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "fetchAppsInfo: Не удалось получить apk для ${info.activityInfo.packageName}", e)
+            } finally {
+                // Обновляем процент обработанных приложений.
+                onProgress((++procesedApps / resolveInfo.size.toFloat() * 100).roundToInt())
             }
 
-            // Обновляем процент обработанных приложений.
-            onProgress(
-                (++procesedApps / resolveInfo.size.toFloat() * 100).roundToInt()
-            )
+            // Вставляем батчем (единственной транзакцией). В таком случае Room заэмитит значение только 1 раз.
+            dao.upsertBatch(result)
         }
     }
 
-    override fun fetchAppsInfo(): Flow<List<AppInfo>> = db.appsDao().getApps()
+    override fun fetchAppsInfo(): Flow<List<AppInfo>> = db.appsDao().getApps().distinctUntilChanged()
 
     override suspend fun getCachedAppsCount(): Int {
         val dao = db.appsDao()
@@ -120,6 +128,28 @@ class AppsScanRepositoryImpl(
 
         return byteArrayToHex(md.digest())
     }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun computeCombinedSha256OfFiles(paths: List<String>): String? {
+        val md = MessageDigest.getInstance("SHA-256")
+        var any = false
+        val buffer = ByteArray(8 * 1024)
+        for (p in paths) {
+            val f = File(p)
+            if (!f.exists()) continue
+            any = true
+            FileInputStream(f).use { fis ->
+                var read = fis.read(buffer)
+                while (read >= 0) {
+                    md.update(buffer, 0, read)
+                    read = fis.read(buffer)
+                }
+            }
+        }
+        return if (!any) null else md.digest().toHexString()
+    }
+
+
 
     private fun saveAppIconToCache(context: Context, packageName: String, drawable: Drawable): String? {
         return try {

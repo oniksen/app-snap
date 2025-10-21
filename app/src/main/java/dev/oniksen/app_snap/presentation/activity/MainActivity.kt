@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AppSnapTheme {
-
+                val appsListIsrefreshing by appsViewModel.appsListIsRefreshing.collectAsStateWithLifecycle()
                 val appListState by appsViewModel.appListState.collectAsStateWithLifecycle()
 
                 LaunchedEffect(Unit) {
@@ -51,6 +51,10 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(top = innerPadding.calculateTopPadding()),
                         apps = appListState,
+                        isRefreshing = appsListIsrefreshing,
+                        onRefresh = {
+                            appsViewModel.rescanApps()
+                        },
                     )
                 }
             }
