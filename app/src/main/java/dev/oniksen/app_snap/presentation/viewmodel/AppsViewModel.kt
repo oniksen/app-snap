@@ -48,4 +48,6 @@ class AppsViewModel @Inject constructor(
             }
         }
     }
+
+    override fun getAppInfo(packageName: String) = _appListState.value.find { it.packageName == packageName }
 }

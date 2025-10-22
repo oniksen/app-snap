@@ -1,6 +1,5 @@
 package dev.oniksen.app_snap.presentation.pages.app_details
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

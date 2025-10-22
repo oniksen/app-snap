@@ -9,13 +9,12 @@ import androidx.navigation.toRoute
 import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.presentation.pages.app_details.AppDetailsPage
 import dev.oniksen.app_snap.presentation.pages.app_list.AppListPage
+import dev.oniksen.app_snap.presentation.viewmodel.contract.AppsViewModelContract
 
 @Composable
 fun NavComponent(
     modifier: Modifier,
-    apps: List<AppInfo>,
-    isRefreshing: Boolean,
-    onRefresh: () -> Unit,
+    appsViewModel: AppsViewModelContract,
 ) {
     val navController = rememberNavController()
 
@@ -26,18 +25,15 @@ fun NavComponent(
         composable<Destination.AppList> {
             AppListPage(
                 modifier = modifier,
-                apps = apps,
-                isRefreshing = isRefreshing,
-                onRefresh = onRefresh,
-                onItemClick = { appInfo ->
-                    navController.navigate(Destination.AppDetails(appInfo.packageName))
-                }
-            )
+                appsViewModel = appsViewModel
+            ) { clickedApp ->
+                navController.navigate(Destination.AppDetails(clickedApp.packageName))
+            }
         }
+
         composable<Destination.AppDetails> { backStackEntry ->
             val args: Destination.AppDetails = backStackEntry.toRoute()
-
-            val appInfo = apps.find { it.packageName == args.packageName }
+            val appInfo = appsViewModel.getAppInfo(args.packageName)
 
             AppDetailsPage (
                 modifier = modifier,

@@ -11,4 +11,6 @@ interface AppsViewModelContract {
     fun rescanApps()
 
     fun scanIfNeed()
+
+    fun getAppInfo(packageName: String): AppInfo?
 }
