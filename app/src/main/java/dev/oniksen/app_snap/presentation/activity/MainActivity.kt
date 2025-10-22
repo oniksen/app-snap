@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import dev.oniksen.app_snap.navigation.NavComponent
 import dev.oniksen.app_snap.presentation.pages.app_list.AppListPage
 import dev.oniksen.app_snap.presentation.theme.AppSnapTheme
 import dev.oniksen.app_snap.presentation.viewmodel.AppsViewModel
@@ -46,15 +47,13 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppListPage(
+                    NavComponent(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(top = innerPadding.calculateTopPadding()),
                         apps = appListState,
                         isRefreshing = appsListIsrefreshing,
-                        onRefresh = {
-                            appsViewModel.rescanApps()
-                        },
+                        onRefresh = { appsViewModel.rescanApps() }
                     )
                 }
             }

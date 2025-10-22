@@ -59,6 +59,8 @@ class AppsScanRepositoryImpl(
             try {
                 val appInfo = pm.getApplicationInfo(info.activityInfo.packageName, 0)
                 val packageName = appInfo.packageName
+                val version = pm.getPackageInfo(packageName, 0).versionName
+
 
                 val appPaths = mutableListOf<String>()
                 appInfo.sourceDir?.let { appPaths.add(it) } // Получаем базовый путь apk
@@ -95,7 +97,8 @@ class AppsScanRepositoryImpl(
                     packageName = packageName,
                     appName = appName,
                     hashSum = combinedHash,
-                    iconFilePath = iconPath ?: dao.getIconPathFor(packageName)
+                    iconFilePath = iconPath ?: dao.getIconPathFor(packageName),
+                    appVersion = version,
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "fetchAppsInfo: Не удалось получить apk для ${info.activityInfo.packageName}", e)

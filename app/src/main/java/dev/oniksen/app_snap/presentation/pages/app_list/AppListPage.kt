@@ -1,6 +1,7 @@
 package dev.oniksen.app_snap.presentation.pages.app_list
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,6 +34,7 @@ fun AppListPage(
     apps: List<AppInfo>,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
+    onItemClick: (AppInfo) -> Unit,
 ) {
 
     PullToRefreshLazyColumn(
@@ -43,6 +45,10 @@ fun AppListPage(
         onRefresh = onRefresh,
     ) {
         ListItem(
+            modifier = Modifier
+                .clickable {
+                    onItemClick(it)
+               },
             headlineContent = {
                 Text(text = it.appName)
             },
@@ -70,6 +76,7 @@ private fun StateForPreview() {
         modifier = Modifier,
         isRefreshing = false,
         onRefresh = { },
+        onItemClick = { },
     )
 }
 

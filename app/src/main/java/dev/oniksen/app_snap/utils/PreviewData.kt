@@ -8,29 +8,34 @@ val previewApps = listOf(
         appName = "Календарь",
         hashSum = "abc123",
         iconFilePath = "",
+        appVersion = "1.0.0",
     ),
     AppInfo(
         packageName = "com.example.camera",
         appName = "Камера",
         hashSum = "def456",
          iconFilePath = "",
+        appVersion = "1.0.0",
     ),
     AppInfo(
         packageName = "com.example.music",
         appName = "Музыка",
         hashSum = "ghi789",
          iconFilePath = "",
+        appVersion = "1.0.0",
     ),
     AppInfo(
         packageName = "com.example.notes",
         appName = "Заметки",
         hashSum = "jkl012",
          iconFilePath = "",
+        appVersion = "1.0.0",
     ),
     AppInfo(
         packageName = "com.example.browser",
         appName = "Браузер",
         hashSum = "mno345",
          iconFilePath = "",
+        appVersion = "1.0.0",
     )
 )
