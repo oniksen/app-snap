@@ -2,6 +2,7 @@ package dev.oniksen.app_snap.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,8 +16,9 @@ import dev.oniksen.app_snap.presentation.viewmodel.contract.AppsViewModelContrac
 fun NavComponent(
     modifier: Modifier,
     appsViewModel: AppsViewModelContract,
+    navController: NavHostController,
+    onPageSelected: (pageTitle: String) -> Unit,
 ) {
-    val navController = rememberNavController()
 
     NavHost(
         navController = navController,
@@ -28,6 +30,7 @@ fun NavComponent(
                 appsViewModel = appsViewModel
             ) { clickedApp ->
                 navController.navigate(Destination.AppDetails(clickedApp.packageName))
+                onPageSelected(clickedApp.appName)
             }
         }
 

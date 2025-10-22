@@ -11,21 +11,16 @@ import androidx.core.graphics.drawable.toBitmap
 import dev.oniksen.app_snap.data.local.AppsDataBase
 import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.domain.repository.AppsScanRepository
-import dev.oniksen.app_snap.presentation.activity.byteArrayToHex
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
-import okio.HashingSink.Companion.sha256
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.security.DigestInputStream
 import java.security.MessageDigest
 import kotlin.math.roundToInt
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 class AppsScanRepositoryImpl(
     private val context: Context,
