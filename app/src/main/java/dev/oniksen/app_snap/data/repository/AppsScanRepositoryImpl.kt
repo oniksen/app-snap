@@ -116,19 +116,6 @@ class AppsScanRepositoryImpl(
         return withContext(Dispatchers.IO) { dao.getCachedAppsCount() }
     }
 
-    private fun File.calculateSha256(): String {
-        val md = MessageDigest.getInstance("SHA-256")
-
-        FileInputStream(this).use { fis ->
-            DigestInputStream(fis, md).use { dis ->
-                val buffer = ByteArray(8 * 1024)
-                while (dis.read(buffer) != -1) { /* просто читаем чтобы обновить digest */ }
-            }
-        }
-
-        return byteArrayToHex(md.digest())
-    }
-
     @OptIn(ExperimentalStdlibApi::class)
     private fun computeCombinedSha256OfFiles(paths: List<String>): String? {
         val md = MessageDigest.getInstance("SHA-256")
@@ -148,8 +135,6 @@ class AppsScanRepositoryImpl(
         }
         return if (!any) null else md.digest().toHexString()
     }
-
-
 
     private fun saveAppIconToCache(context: Context, packageName: String, drawable: Drawable): String? {
         return try {
