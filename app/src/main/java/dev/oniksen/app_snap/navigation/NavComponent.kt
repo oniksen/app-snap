@@ -17,7 +17,6 @@ fun NavComponent(
     modifier: Modifier,
     appsViewModel: AppsViewModelContract,
     navController: NavHostController,
-    onPageSelected: (pageTitle: String) -> Unit,
 ) {
 
     NavHost(
@@ -30,7 +29,6 @@ fun NavComponent(
                 appsViewModel = appsViewModel
             ) { clickedApp ->
                 navController.navigate(Destination.AppDetails(clickedApp.packageName))
-                onPageSelected(clickedApp.appName)
             }
         }
 
