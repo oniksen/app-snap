@@ -13,4 +13,5 @@ data class AppInfo(
     @ColumnInfo("app_version") val appVersion: String?,
     @ColumnInfo("hash_sum") val hashSum: String,
     @ColumnInfo("icon_file_path") val iconFilePath: String?,
+    @ColumnInfo("last_known_hash") val lastKnownHash: String? = null,
 )

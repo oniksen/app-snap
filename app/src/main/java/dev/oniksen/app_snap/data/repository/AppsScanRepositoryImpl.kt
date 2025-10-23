@@ -94,6 +94,7 @@ class AppsScanRepositoryImpl(
                     hashSum = combinedHash,
                     iconFilePath = iconPath ?: dao.getIconPathFor(packageName),
                     appVersion = version,
+                    lastKnownHash = existingHash,
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "fetchAppsInfo: Не удалось получить apk для ${info.activityInfo.packageName}", e)
