@@ -36,7 +36,7 @@ class AppsViewModel @Inject constructor(
 
             appsScanRepository.scanApps { progress ->
                 Log.d(TAG, "rescanApps: progress = $progress")
-                _appsListIsRefreshing.emit(Pair(true, progress))
+                _appsListIsRefreshing.tryEmit(Pair(true, progress))
             }
 
             _appsListIsRefreshing.emit(Pair(false, 0f))

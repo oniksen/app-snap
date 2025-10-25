@@ -8,7 +8,7 @@ interface AppsScanRepository {
     /**
      * Получение данных по всем установленным приложениям.
      * */
-    suspend fun scanApps(onProgress: suspend (Float) -> Unit)
+    suspend fun scanApps(onProgress: (Float) -> Unit)
 
     /**
      * Получить список кэшированных приложений.
