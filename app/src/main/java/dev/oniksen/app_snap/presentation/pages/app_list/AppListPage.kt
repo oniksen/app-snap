@@ -12,10 +12,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +32,9 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -55,9 +65,6 @@ fun AppListPage(
 
     LaunchedEffect(Unit) {
         appsViewModel.scanIfNeed()
-    }
-    LaunchedEffect(appsListIsrefreshing) {
-        Log.d(TAG, "appsListIsrefreshing: ${appsListIsrefreshing.second}")
     }
 
     AppsListPageContent(
@@ -115,6 +122,8 @@ private fun AppsListPageContent(
                 isRefreshing = appsListIsrefreshing.first,
                 onRefresh = onRefresh,
             ) {
+                var expanded by remember { mutableStateOf(false) }
+
                 Column {
                     ListItem(
                         modifier = Modifier
@@ -125,17 +134,7 @@ private fun AppsListPageContent(
                             Text(text = it.appName)
                         },
                         supportingContent = {
-                            Column {
-                                Text(text = it.packageName)
-                                if (it.hashSum != it.lastScanHash && it.lastScanHash != null) {
-                                    Text(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        text = "Изменено",
-                                        color = MaterialTheme.colorScheme.error,
-                                        textAlign = TextAlign.End,
-                                    )
-                                }
-                            }
+                            Text(text = it.packageName)
                         },
                         leadingContent = {
                             it.iconFilePath?.let { iconPath ->
@@ -144,6 +143,28 @@ private fun AppsListPageContent(
                                     painter = rememberAsyncImagePainter(File(it.iconFilePath)),
                                     contentDescription = "App icon",
                                 )
+                            }
+                        },
+                        trailingContent = {
+                            if (it.hashSum != it.lastScanHash && it.lastScanHash != null) {
+                                IconButton(
+                                    onClick = { expanded = !expanded }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ErrorOutline,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Сохранить изменения") },
+                                        onClick = {  }
+                                    )
+                                }
                             }
                         }
                     )
@@ -155,10 +176,12 @@ private fun AppsListPageContent(
 }
 
 @Composable
-private fun StateForPreview() {
+private fun StateForPreview(
+    appsListIsrefreshing: Pair<Boolean, Float>,
+) {
     AppsListPageContent (
         appListState = previewApps,
-        appsListIsrefreshing = Pair(true, 0.3f),
+        appsListIsrefreshing = appsListIsrefreshing,
         onItemClick = {},
         onRefresh = {},
     )
@@ -167,20 +190,41 @@ private fun StateForPreview() {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Preview
 @Composable
-private fun AppsListPage_Light() {
+private fun AppsListPageLoading_Light() {
     MaterialExpressiveTheme {
         Surface {
-            StateForPreview()
+            StateForPreview(Pair(true, 0.3f))
         }
     }
 }
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Preview
 @Composable
-private fun AppsListPage_Dark() {
+private fun AppsListPageLoading_Dark() {
     MaterialExpressiveTheme(darkColorScheme()) {
         Surface {
-            StateForPreview()
+            StateForPreview(Pair(true, 0.3f))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Preview
+@Composable
+private fun AppsListPageMain_Light() {
+    MaterialExpressiveTheme {
+        Surface {
+            StateForPreview(Pair(false, 0.0f))
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Preview
+@Composable
+private fun AppsListPageMain_Dark() {
+    MaterialExpressiveTheme(darkColorScheme()) {
+        Surface {
+            StateForPreview(Pair(false, 0.0f))
         }
     }
 }
