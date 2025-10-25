@@ -9,7 +9,7 @@ val previewApps = listOf(
         hashSum = "abc123",
         iconFilePath = "",
         appVersion = "1.0.0",
-        lastKnownHash = "abc123",
+        lastScanHash = "abc123",
     ),
     AppInfo(
         packageName = "com.example.camera",

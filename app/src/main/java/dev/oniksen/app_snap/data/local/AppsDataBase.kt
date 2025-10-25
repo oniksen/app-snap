@@ -7,7 +7,7 @@ import dev.oniksen.app_snap.domain.model.AppInfo
 
 @Database(
     entities = [AppInfo::class],
-    version = 6,
+    version = 7,
 )
 abstract class AppsDataBase: RoomDatabase() {
     abstract fun appsDao(): AppsDao

@@ -56,11 +56,11 @@ class AppsScanRepositoryImpl(
                 val packageName = appInfo.packageName
                 val version = pm.getPackageInfo(packageName, 0).versionName
 
-
                 val appPaths = mutableListOf<String>()
                 appInfo.sourceDir?.let { appPaths.add(it) } // Получаем базовый путь apk
                 appInfo.splitSourceDirs?.let { splitDirs -> appPaths.addAll(splitDirs) }    // Получаем так же и дополнительные пути файлов приложения
 
+                val appName = appInfo.loadLabel(pm).toString()
                 // вычисляем контрольную сумму по всем apk файлам приложения (конкатенируем)
                 val combinedHash = computeCombinedSha256OfFiles(appPaths)
 
@@ -70,10 +70,16 @@ class AppsScanRepositoryImpl(
                     continue
                 }
 
-                // Проверка кэша. Если hash не изменился, то ропускаем пересохранение иконки.
-                val existingHash = dao.getHashSumFor(packageName)
-                val needSaveIcon = existingHash == null || existingHash != combinedHash
+                val savedHashSum = dao.fetchHashSumFor(packageName)
+                val savedLastScanHashSum = dao.fetchLastScanHashFor(packageName)
 
+                // Если есть разница между последним сохранённым кэшем и текущим, то значит, что с последнего
+                // сканирования произошли изменения в приложении. В этом случае обновляем только текущий хэш,
+                // чтобы показывать изменения с последнего обновления, пока пользователь не подтвердит их легитимность.
+                val isDiffFromLastKnownHash = savedLastScanHashSum != null && combinedHash != savedLastScanHashSum
+
+                val needSaveIcon = savedHashSum == null || savedHashSum != combinedHash
+                // Проверка кэша. Если hash не изменился, то ропускаем пересохранение иконки.
                 val iconPath = if (needSaveIcon) {
                     val icon = pm.getApplicationIcon(packageName)
                     saveAppIconToCache(
@@ -87,14 +93,19 @@ class AppsScanRepositoryImpl(
                     null
                 }
 
-                val appName = appInfo.loadLabel(pm).toString()
+                if (packageName == "com.lpmti.barkemp_event_scaner") {
+                    Log.d(TAG, "scanApps: need pause for debug")
+                }
+
                 result += AppInfo(
                     packageName = packageName,
                     appName = appName,
                     hashSum = combinedHash,
                     iconFilePath = iconPath ?: dao.getIconPathFor(packageName),
                     appVersion = version,
-                    lastKnownHash = existingHash,
+                    // Если есть разница в хэшах - оставляем существующее значение в lastScanHash,
+                    // чтобы постоянно показывать разницу с последним легитимным результатом.
+                    lastScanHash = if (isDiffFromLastKnownHash) savedLastScanHashSum else savedHashSum,
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "fetchAppsInfo: Не удалось получить apk для ${info.activityInfo.packageName}", e)

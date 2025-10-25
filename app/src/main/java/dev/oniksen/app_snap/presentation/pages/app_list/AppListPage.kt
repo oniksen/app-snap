@@ -78,7 +78,7 @@ private fun AppsListPageContent(
                 supportingContent = {
                     Column {
                         Text(text = it.packageName)
-                        if (it.hashSum != it.lastKnownHash) {
+                        if (it.hashSum != it.lastScanHash && it.lastScanHash != null) {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = "Изменено",
