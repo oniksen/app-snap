@@ -1,5 +1,6 @@
 package dev.oniksen.app_snap.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,7 @@ import javax.inject.Inject
 class AppsViewModel @Inject constructor(
     private val appsScanRepository: AppsScanRepository
 ): ViewModel(), AppsViewModelContract {
-    private val _appsListIsRefreshing = MutableStateFlow(false)
+    private val _appsListIsRefreshing = MutableStateFlow(Pair(false, 0f))
     override val appsListIsRefreshing = _appsListIsRefreshing
 
     private val _appListState = appsScanRepository.fetchAppsInfo().stateIn(
@@ -31,13 +32,14 @@ class AppsViewModel @Inject constructor(
 
     override fun rescanApps() {
         viewModelScope.launch {
-            _appsListIsRefreshing.emit(true)
+            _appsListIsRefreshing.emit(Pair(true, 0f))
 
             appsScanRepository.scanApps { progress ->
-                // TODO("Эмитить прогресс в ui flow")
+                Log.d(TAG, "rescanApps: progress = $progress")
+                _appsListIsRefreshing.emit(Pair(true, progress))
             }
 
-            _appsListIsRefreshing.emit(false)
+            _appsListIsRefreshing.emit(Pair(false, 0f))
         }
     }
 
@@ -50,4 +52,8 @@ class AppsViewModel @Inject constructor(
     }
 
     override fun getAppInfo(packageName: String) = _appListState.value.find { it.packageName == packageName }
+
+    private companion object {
+        const val TAG = "AppsViewModel"
+    }
 }

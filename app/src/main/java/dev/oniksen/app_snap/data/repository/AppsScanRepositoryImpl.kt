@@ -37,7 +37,7 @@ class AppsScanRepositoryImpl(
      * Используем packageName как стабильный PK.
      * */
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun scanApps(onProgress: (Int) -> Unit) = withContext(Dispatchers.IO) {
+    override suspend fun scanApps(onProgress: suspend (Float) -> Unit) = withContext(Dispatchers.IO) {
         val dao = db.appsDao()
         val pm = context.packageManager
 
@@ -66,7 +66,7 @@ class AppsScanRepositoryImpl(
 
                 // Если не удалось посчитать, то пропускаем.
                 if (combinedHash == null) {
-                    onProgress((++procesedApps / resolveInfo.size.toFloat() * 100).roundToInt())
+                    onProgress(++procesedApps / resolveInfo.size.toFloat())
                     continue
                 }
 
@@ -111,7 +111,7 @@ class AppsScanRepositoryImpl(
                 Log.e(TAG, "fetchAppsInfo: Не удалось получить apk для ${info.activityInfo.packageName}", e)
             } finally {
                 // Обновляем процент обработанных приложений.
-                onProgress((++procesedApps / resolveInfo.size.toFloat() * 100).roundToInt())
+                onProgress(++procesedApps / resolveInfo.size.toFloat())
             }
 
             // Вставляем батчем (единственной транзакцией). В таком случае Room заэмитит значение только 1 раз.
