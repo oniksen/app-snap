@@ -36,9 +36,11 @@ fun NavComponent(
             val args: Destination.AppDetails = backStackEntry.toRoute()
             val appInfo = appsViewModel.getAppInfo(args.packageName)
 
-            AppDetailsPage (
+            AppDetailsPage(
                 modifier = modifier,
-                appInfo = appInfo,
+                updateLastScanHash = appsViewModel::updateLastScanHash,
+                packageName = appInfo?.packageName!!,
+                appsViewModel = appsViewModel,
             )
         }
     }

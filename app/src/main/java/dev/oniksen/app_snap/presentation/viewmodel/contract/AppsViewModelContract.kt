@@ -1,6 +1,7 @@
 package dev.oniksen.app_snap.presentation.viewmodel.contract
 
 import dev.oniksen.app_snap.domain.model.AppInfo
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface AppsViewModelContract {
@@ -13,4 +14,8 @@ interface AppsViewModelContract {
     fun scanIfNeed()
 
     fun getAppInfo(packageName: String): AppInfo?
+
+    fun fetchAppInfo(packageName: String): Flow<AppInfo?>
+
+    fun updateLastScanHash(packageName: String, hash: String)
 }

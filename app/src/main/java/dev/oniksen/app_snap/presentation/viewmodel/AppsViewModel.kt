@@ -7,10 +7,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.domain.repository.AppsScanRepository
 import dev.oniksen.app_snap.presentation.viewmodel.contract.AppsViewModelContract
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -52,6 +54,14 @@ class AppsViewModel @Inject constructor(
     }
 
     override fun getAppInfo(packageName: String) = _appListState.value.find { it.packageName == packageName }
+
+    override fun fetchAppInfo(packageName: String): Flow<AppInfo?> = appsScanRepository.fetchAppByPackage(packageName)
+
+    override fun updateLastScanHash(packageName: String, hash: String) {
+        viewModelScope.launch {
+            appsScanRepository.updateLastScanHash(packageName, hash)
+        }
+    }
 
     private companion object {
         const val TAG = "AppsViewModel"

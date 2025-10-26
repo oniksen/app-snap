@@ -39,4 +39,10 @@ interface AppsDao {
 
     @Query("SELECT icon_file_path FROM AppInfo WHERE package_name = :pkg LIMIT 1")
     suspend fun getIconPathFor(pkg: String): String?
+
+    @Query("UPDATE AppInfo SET last_scan_hash = :hash WHERE package_name = :pkg")
+    suspend fun updateLastScanHash(pkg: String, hash: String)
+
+    @Query("SELECT * FROM AppInfo WHERE package_name = :pkg")
+    fun getAppByPackage(pkg: String): Flow<AppInfo?>
 }

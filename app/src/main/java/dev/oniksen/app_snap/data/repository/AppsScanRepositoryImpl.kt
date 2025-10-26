@@ -19,6 +19,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -70,6 +71,14 @@ class AppsScanRepositoryImpl(
         val dao = db.appsDao()
         return withContext(Dispatchers.IO) { dao.getCachedAppsCount() }
     }
+
+    override suspend fun updateLastScanHash(pkg: String, hash: String) = coroutineScope {
+        val dao = db.appsDao()
+
+        withContext(Dispatchers.IO) { dao.updateLastScanHash(pkg, hash) }
+    }
+
+    override fun fetchAppByPackage(packageName: String): Flow<AppInfo?> = db.appsDao().getAppByPackage(packageName)
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun computeCombinedSha256OfFiles(paths: List<String>): String? {

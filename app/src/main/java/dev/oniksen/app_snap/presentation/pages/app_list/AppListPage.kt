@@ -9,13 +9,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -40,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,7 +68,8 @@ fun AppListPage(
         appListState = appListState,
         appsListIsrefreshing = appsListIsrefreshing,
         onItemClick = onItemClick,
-        onRefresh = { appsViewModel.rescanApps() }
+        onRefresh = appsViewModel::rescanApps,
+        updateLastScanHash = appsViewModel::updateLastScanHash,
     )
 }
 
@@ -84,6 +81,7 @@ private fun AppsListPageContent(
     appsListIsrefreshing: Pair<Boolean, Float>,
     onItemClick: (AppInfo) -> Unit,
     onRefresh: () -> Unit,
+    updateLastScanHash: (packageName: String, hash: String) -> Unit,
 ) {
     val localDensity = LocalDensity.current
 
@@ -128,6 +126,7 @@ private fun AppsListPageContent(
                     ListItem(
                         modifier = Modifier
                             .clickable {
+                                Log.d(TAG, "Clicked AppInfo: $it")
                                 onItemClick(it)
                             },
                         headlineContent = {
@@ -162,7 +161,12 @@ private fun AppsListPageContent(
                                 ) {
                                     DropdownMenuItem(
                                         text = { Text("Сохранить изменения") },
-                                        onClick = {  }
+                                        onClick = {
+                                            updateLastScanHash(
+                                                it.packageName,
+                                                it.hashSum,
+                                            )
+                                        }
                                     )
                                 }
                             }
@@ -179,11 +183,12 @@ private fun AppsListPageContent(
 private fun StateForPreview(
     appsListIsrefreshing: Pair<Boolean, Float>,
 ) {
-    AppsListPageContent (
+    AppsListPageContent(
         appListState = previewApps,
         appsListIsrefreshing = appsListIsrefreshing,
         onItemClick = {},
         onRefresh = {},
+        updateLastScanHash = { _, _ -> },
     )
 }
 
