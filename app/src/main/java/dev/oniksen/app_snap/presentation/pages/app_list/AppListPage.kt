@@ -57,7 +57,7 @@ fun AppListPage(
     appsViewModel: AppsViewModelContract,
     onItemClick: (AppInfo) -> Unit,
 ) {
-    val appsListIsrefreshing by appsViewModel.appsListIsRefreshing.collectAsStateWithLifecycle()
+    val appsListIsRefreshing by appsViewModel.appsListIsRefreshing.collectAsStateWithLifecycle()
     val appListState by appsViewModel.appListState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -67,7 +67,7 @@ fun AppListPage(
     AppsListPageContent(
         modifier = modifier.fillMaxSize(),
         appListState = appListState,
-        appsListIsRefreshing = appsListIsrefreshing,
+        appsListIsRefreshing = appsListIsRefreshing,
         onItemClick = onItemClick,
         onRefresh = appsViewModel::rescanApps,
         updateLastScanHash = appsViewModel::updateLastScanHash,

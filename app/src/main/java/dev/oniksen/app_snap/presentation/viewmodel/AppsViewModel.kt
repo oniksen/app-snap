@@ -7,11 +7,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.domain.repository.AppsScanRepository
 import dev.oniksen.app_snap.presentation.viewmodel.contract.AppsViewModelContract
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -23,7 +25,10 @@ class AppsViewModel @Inject constructor(
     private val appsScanRepository: AppsScanRepository
 ): ViewModel(), AppsViewModelContract {
     private val _appsListIsRefreshing = MutableStateFlow(Pair(false, 0f))
-    override val appsListIsRefreshing = _appsListIsRefreshing
+    @OptIn(FlowPreview::class)
+    override val appsListIsRefreshing: StateFlow<Pair<Boolean, Float>> = _appsListIsRefreshing
+        .debounce(100) // Обновлять не чаще, чем раз в 100 мс
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Pair(false, 0f))
 
     private val _appListState = appsScanRepository.fetchAppsInfo().stateIn(
         scope = viewModelScope,

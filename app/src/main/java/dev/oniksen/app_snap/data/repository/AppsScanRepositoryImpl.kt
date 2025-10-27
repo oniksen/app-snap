@@ -2,7 +2,6 @@ package dev.oniksen.app_snap.data.repository
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
@@ -19,7 +18,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -27,7 +25,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.security.MessageDigest
 import kotlin.collections.addAll
-import kotlin.math.roundToInt
 import kotlin.uuid.ExperimentalUuidApi
 
 class AppsScanRepositoryImpl(
@@ -126,11 +123,12 @@ class AppsScanRepositoryImpl(
         onProgress: (Float) -> Unit,
     ) = coroutineScope {
         val result = mutableListOf<AppInfo>()
-        var procesedApps = 0
+        var processedApps = 0
         val totalApps = resolveInfo.size
+        val progressStep = maxOf(1, totalApps / 20) // Обновлять каждые ~5%
 
         // Параллельная обработка каждого элемента
-        val defferedResults = resolveInfo.map { info ->
+        val deferredResults = resolveInfo.map { info ->
             async {
                 try {
                     getAppInfo(
@@ -146,15 +144,17 @@ class AppsScanRepositoryImpl(
                 } finally {
                     // Потокобезопасно обновляем счётчик.
                     synchronized(this@coroutineScope) {
-                        procesedApps++
-                        onProgress(procesedApps / totalApps.toFloat())
+                        processedApps++
+                        if (processedApps % progressStep == 0 || processedApps == totalApps) {
+                            onProgress(processedApps / totalApps.toFloat())
+                        }
                     }
                 }
             }
         }
 
         // Собираем результаты в список.
-        result.addAll(defferedResults.awaitAll().filterNotNull())
+        result.addAll(deferredResults.awaitAll().filterNotNull())
 
         // Вставляем батчем (единственной транзакцией). В таком случае Room заэмитит значение только 1 раз.
         dao.upsertBatch(result)
