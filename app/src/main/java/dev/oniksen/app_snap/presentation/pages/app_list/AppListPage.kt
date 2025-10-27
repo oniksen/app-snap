@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,7 +67,7 @@ fun AppListPage(
     AppsListPageContent(
         modifier = modifier.fillMaxSize(),
         appListState = appListState,
-        appsListIsrefreshing = appsListIsrefreshing,
+        appsListIsRefreshing = appsListIsrefreshing,
         onItemClick = onItemClick,
         onRefresh = appsViewModel::rescanApps,
         updateLastScanHash = appsViewModel::updateLastScanHash,
@@ -78,7 +79,7 @@ fun AppListPage(
 private fun AppsListPageContent(
     modifier: Modifier = Modifier,
     appListState: List<AppInfo>,
-    appsListIsrefreshing: Pair<Boolean, Float>,
+    appsListIsRefreshing: Pair<Boolean, Float>,
     onItemClick: (AppInfo) -> Unit,
     onRefresh: () -> Unit,
     updateLastScanHash: (packageName: String, hash: String) -> Unit,
@@ -90,18 +91,18 @@ private fun AppsListPageContent(
         contentAlignment = Alignment.Center,
     ) {
         AnimatedVisibility(
-            visible = appsListIsrefreshing.first,
+            visible = appsListIsRefreshing.first,
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
-                    text = (appsListIsrefreshing.second * 100).roundToInt().toString() + "%",
+                    text = (appsListIsRefreshing.second * 100).roundToInt().toString() + "%",
                     fontWeight = FontWeight.Black,
                 )
                 CircularWavyProgressIndicator(
                     modifier = Modifier.size(72.dp),
-                    progress = { appsListIsrefreshing.second },
+                    progress = { appsListIsRefreshing.second },
                     stroke = with(localDensity) { Stroke(8.dp.toPx()) },
                     trackStroke = with(localDensity) { Stroke(8.dp.toPx()) },
                     gapSize = 4.dp,
@@ -109,7 +110,7 @@ private fun AppsListPageContent(
             }
         }
         AnimatedVisibility(
-            visible = !appsListIsrefreshing.first,
+            visible = !appsListIsRefreshing.first,
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -117,7 +118,7 @@ private fun AppsListPageContent(
                 modifier = modifier,
                 items = appListState,
                 getKey = { appInfo -> appInfo.packageName },
-                isRefreshing = appsListIsrefreshing.first,
+                isRefreshing = appsListIsRefreshing.first,
                 onRefresh = onRefresh,
             ) {
                 var expanded by remember { mutableStateOf(false) }
@@ -133,7 +134,11 @@ private fun AppsListPageContent(
                             Text(text = it.appName)
                         },
                         supportingContent = {
-                            Text(text = it.packageName)
+                            Text(
+                                text = it.packageName,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         },
                         leadingContent = {
                             it.iconFilePath?.let { iconPath ->
@@ -181,11 +186,11 @@ private fun AppsListPageContent(
 
 @Composable
 private fun StateForPreview(
-    appsListIsrefreshing: Pair<Boolean, Float>,
+    appsListIsRefreshing: Pair<Boolean, Float>,
 ) {
     AppsListPageContent(
         appListState = previewApps,
-        appsListIsrefreshing = appsListIsrefreshing,
+        appsListIsRefreshing = appsListIsRefreshing,
         onItemClick = {},
         onRefresh = {},
         updateLastScanHash = { _, _ -> },

@@ -1,6 +1,10 @@
 package dev.oniksen.app_snap.presentation.pages.app_details
 
-import androidx.compose.foundation.Image
+import android.content.res.Configuration
+import android.media.VolumeShaper
+import  androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,12 +12,16 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.outlined.Save
@@ -34,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,57 +80,154 @@ fun AppDetailsPage(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun AppDetailsPageContent (
+private fun AppDetailsPageContent(
     modifier: Modifier = Modifier,
     appInfo: AppInfo,
     updateLastScanHash: (packageName: String, hash: String) -> Unit,
 ) {
     val isAppModified = appInfo.hashSum != appInfo.lastScanHash && appInfo.lastScanHash != null
     val localContext = LocalContext.current
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Header(
-            modifier = Modifier.padding(bottom = 24.dp),
-            iconFilePath = appInfo.iconFilePath.toString(),
-            appName = appInfo.appName,
-            packageName = appInfo.packageName
+    if (isLandscape) {
+        Row(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            val launchIntent = localContext.packageManager.getLaunchIntentForPackage(appInfo.packageName)
-            if (launchIntent != null) {
-                localContext.startActivity(launchIntent)
+            // Левая часть: Header
+            Header(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 16.dp),
+                iconFilePath = appInfo.iconFilePath.toString(),
+                appName = appInfo.appName,
+                packageName = appInfo.packageName
+            ) {
+                val launchIntent = localContext.packageManager.getLaunchIntentForPackage(appInfo.packageName)
+                if (launchIntent != null) {
+                    localContext.startActivity(launchIntent)
+                }
             }
-        }
 
-        if (isAppModified) {
-            ModifiedAppAlertFIeld(modifier = Modifier.padding(bottom = 8.dp))
-        }
-
-        VersionField(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            value = appInfo.appVersion ?: "Неизвестно",
-        )
-
-        HashSumField(
-            modifier = Modifier,
-            hashSum = appInfo.hashSum,
-        )
-
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            if (isAppModified)
-                UpdateHashButton {
-                    updateLastScanHash(
-                        appInfo.packageName,
-                        appInfo.hashSum,
+            // Правая часть: прокручиваемая Column
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if (isAppModified) {
+                    ModifiedAppAlertField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
                     )
                 }
+
+                VersionField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 16.dp),
+                    value = appInfo.appVersion ?: "Неизвестно",
+                )
+
+                HashSumField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    hashSum = appInfo.hashSum,
+                )
+
+                // Добавляем Spacer для заполнения пространства
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Кнопка внизу, но без Box, чтобы не мешать прокрутке
+                if (isAppModified) {
+                    UpdateHashButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp)
+                            .wrapContentSize(Alignment.Center),
+                        updateLastScanHash = {
+                            updateLastScanHash(
+                                appInfo.packageName,
+                                appInfo.hashSum,
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    } else {
+        // Portrait-ориентация: текущая реализация
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            Header(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                iconFilePath = appInfo.iconFilePath.toString(),
+                appName = appInfo.appName,
+                packageName = appInfo.packageName
+            ) {
+                val launchIntent = localContext.packageManager.getLaunchIntentForPackage(appInfo.packageName)
+                if (launchIntent != null) {
+                    localContext.startActivity(launchIntent)
+                }
+            }
+
+            if (isAppModified) {
+                ModifiedAppAlertField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            }
+
+            VersionField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                value = appInfo.appVersion ?: "Неизвестно",
+            )
+
+            HashSumField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 20.dp),
+                hashSum = appInfo.hashSum,
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                if (isAppModified) {
+                    UpdateHashButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp)
+                            .wrapContentSize(Alignment.Center),
+                        updateLastScanHash = {
+                            updateLastScanHash(
+                                appInfo.packageName,
+                                appInfo.hashSum,
+                            )
+                        }
+                    )
+                }
+            }
         }
     }
 }
@@ -135,7 +241,7 @@ private fun Header(
     openApp: () -> Unit,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically // КЛЮЧЕВОЕ: центрируем иконку по вертикали
     ) {
         Image(
@@ -151,7 +257,8 @@ private fun Header(
 
         // Правая колонка — растягивается по содержимому
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
         ) {
             Column {
                 Text(
@@ -206,7 +313,7 @@ private fun HashSumField (
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 8.dp),
+            .padding(top = 8.dp, bottom = 20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
         )
@@ -228,7 +335,7 @@ private fun HashSumField (
 }
 
 @Composable
-private fun ModifiedAppAlertFIeld(
+private fun ModifiedAppAlertField(
     modifier: Modifier = Modifier,
 ) {
     Row {
@@ -243,6 +350,7 @@ private fun ModifiedAppAlertFIeld(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     modifier = Modifier.weight(1f),
@@ -304,6 +412,27 @@ private fun AppDetailsPage_Light() {
 @Preview
 @Composable
 private fun AppDetailsPage_Dark() {
+    MaterialExpressiveTheme(darkColorScheme()) {
+        Surface {
+            StateForPreview()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Preview(device = "spec:parent=pixel_5,orientation=landscape")
+@Composable
+private fun AppDetailsPage_LandscapeLight() {
+    MaterialExpressiveTheme {
+        Surface {
+            StateForPreview()
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Preview(device = "spec:parent=pixel_5,orientation=landscape")
+@Composable
+private fun AppDetailsPage_LandscapeDark() {
     MaterialExpressiveTheme(darkColorScheme()) {
         Surface {
             StateForPreview()

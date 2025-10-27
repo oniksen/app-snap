@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
                     NavComponent(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = innerPadding.calculateTopPadding()),
+                            .padding(innerPadding),
                         appsViewModel = appsViewModel,
                         navController = navController,
                     )
