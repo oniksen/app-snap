@@ -10,6 +10,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -29,6 +30,7 @@ fun<T> PullToRefreshLazyGrid(
         state = rememberPullToRefreshState(),
     ) {
         LazyVerticalGrid(
+            modifier = Modifier.testTag(TestTag.APP_LIST_PAGE_ITEMS_GRID),
             columns = GridCells.Adaptive(minSize = 300.dp),
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),

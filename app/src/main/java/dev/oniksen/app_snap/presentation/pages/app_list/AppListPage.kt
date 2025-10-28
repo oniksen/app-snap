@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ import dev.oniksen.app_snap.domain.model.AppInfo
 import dev.oniksen.app_snap.presentation.pages.app_list.component.AppsListItem
 import dev.oniksen.app_snap.presentation.viewmodel.contract.AppsViewModelContract
 import dev.oniksen.app_snap.utils.PullToRefreshLazyGrid
+import dev.oniksen.app_snap.utils.TestTag
 import dev.oniksen.app_snap.utils.previewApps
 import kotlin.math.roundToInt
 
@@ -63,7 +65,7 @@ fun AppListPage(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun AppsListPageContent(
+fun AppsListPageContent(
     modifier: Modifier = Modifier,
     appListState: List<AppInfo>,
     appsListIsRefreshing: Pair<Boolean, Float>,
@@ -101,7 +103,9 @@ private fun AppsListPageContent(
                     modifier = Modifier.align(Alignment.Center)
                 )
                 CircularWavyProgressIndicator(
-                    modifier = Modifier.size(72.dp),
+                    modifier = Modifier
+                        .size(72.dp)
+                        .testTag(TestTag.APP_LIST_PAGE_LOAD_INDICATOR),
                     progress = { animatedProgress }, // Используем анимированный прогресс
                     stroke = with(localDensity) { Stroke(8.dp.toPx()) },
                     trackStroke = with(localDensity) { Stroke(8.dp.toPx()) },

@@ -121,11 +121,11 @@ class AppsScanRepositoryImpl(
         pm: PackageManager,
         dao: AppsDao,
         onProgress: (Float) -> Unit,
-    ) = coroutineScope {
+    ) = withContext(Dispatchers.Default) {
         val result = mutableListOf<AppInfo>()
         var processedApps = 0
         val totalApps = resolveInfo.size
-        val progressStep = maxOf(1, totalApps / 20) // Обновлять каждые ~5%
+        val progressStep = maxOf(1, totalApps / 20)
 
         // Параллельная обработка каждого элемента
         val deferredResults = resolveInfo.map { info ->
@@ -142,12 +142,13 @@ class AppsScanRepositoryImpl(
                     Log.e(TAG, "fetchAppsInfo: Не удалось получить apk для ${info.activityInfo.packageName}", e)
                     null
                 } finally {
-                    // Потокобезопасно обновляем счётчик.
-                    synchronized(this@coroutineScope) {
-                        processedApps++
-                        if (processedApps % progressStep == 0 || processedApps == totalApps) {
+                    processedApps++
+                    if (processedApps % progressStep == 0 || processedApps == totalApps) {
+                        // Потокобезопасно обновляем счётчик.
+                        synchronized(this@withContext) {
                             onProgress(processedApps / totalApps.toFloat())
                         }
+
                     }
                 }
             }
