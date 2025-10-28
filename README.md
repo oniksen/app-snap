@@ -15,7 +15,7 @@
 
 - **Обнаружение изменений**  
   При изменении контрольной суммы отображается иконка предупреждения.  
-  Пользователь может подтвердить осведомлённость об изменениях и обновить сохранённые данные.
+  Пользователь может подтвердить осведомлённость об изменениях и обновить сохранённые данные на странице подробностей или же нажам на предупреждающую иконку на странице списка.
 
 - **Pull-to-Refresh**  
   Поддерживается повторное сканирование приложений с помощью жеста обновления списка.
@@ -31,13 +31,11 @@
 
 | **Портретный режим** | **Альбомный режим** |
 |:---:|:---:|
-| ![Портретный режим](https://github.com/user-attachments/assets/b25c9c3c-36d4-4f2c-921d-960204ddd5fd) | ![Альбомный режим](https://github.com/user-attachments/assets/ca6fa4cc-5bc7-4203-8522-e49b97b96850) |
+| <img alt="Портретный режим" src="https://github.com/user-attachments/assets/56bf4b3d-6b83-4418-acca-3df969afe59d" style="width: 200px; height: auto;" /> | <img alt="Альбомный режим" src="https://github.com/user-attachments/assets/7da97160-d04a-4e5a-b757-9fb4a89ba68a" style="width: 400px; height: auto;" /> |
 
 ### Обновление списка (Pull-to-Refresh)
 
-<div style="max-width: 400px;">
-  <img src="https://github.com/user-attachments/assets/9df23150-39b2-4c86-92f9-145bb6b3cb35" alt="Pull-to-Refresh" style="width: 200px; height: auto;">
-</div>
+<div><img src="https://github.com/user-attachments/assets/9df23150-39b2-4c86-92f9-145bb6b3cb35" alt="Pull-to-Refresh" style="width: 200px; height: auto;"></div>
 
 ---
 
@@ -49,7 +47,8 @@
 
 | **Портретный режим** | **Альбомный режим** |
 |:---:|:---:|
-| ![Портретный режим](https://github.com/user-attachments/assets/a5c52eb4-2bd8-4234-840a-540804f04fb7) | ![Альбомный режим](https://github.com/user-attachments/assets/aea6af3e-e05c-4c08-85f0-8891d54df3fd) |
+| <img alt="Портретный режим" src="https://github.com/user-attachments/assets/b1366bfa-c7b4-4d63-8b19-24f73b4f2d8b"  style="width: 200px; height: auto;"/> | <img alt="Альбомный режим" src="https://github.com/user-attachments/assets/aea6af3e-e05c-4c08-85f0-8891d54df3fd" style="width: 400px; height: auto;" /> |
+
 
 ---
 
