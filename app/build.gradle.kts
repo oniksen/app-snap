@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    kotlin("plugin.serialization") version "2.0.21"
 }
 
 android {
@@ -54,8 +55,12 @@ dependencies {
     implementation(libs.room.core)
     implementation(libs.room.ktx)
     implementation(libs.hilt.core)
-    ksp(libs.hilt.compiler)
-    ksp(libs.room.compiler)
+    implementation(libs.androidx.material3)
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.compose.material.icons.extended)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,9 +68,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    implementation("androidx.compose.material3:material3:1.5.0-alpha06")
-    // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
-    implementation("io.coil-kt.coil3:coil-compose:3.0.0")
+    ksp(libs.hilt.compiler)
+    ksp(libs.room.compiler)
 }

@@ -3,36 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="dev.oniksen.app_snap">
 
-    <!-- Полный доступ ко всем установленным пакетам (Android 7.0+). -->
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES"
-        android:minSdkVersion="24"
-        android:maxSdkVersion="34"
+    <!--
+        Доступ ко всем установленным пакетам (Android 7.0+).
+        Не требует указания min/max sdkVersion, т.к. на старых версиях просто не запрашивается.
+    -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />
 
-    <!-- Доступ к статистике использования приложений -->
-    <uses-permission
-        android:name="android.permission.PACKAGE_USAGE_STATS"
-        android:minSdkVersion="24"
-        tools:ignore="ProtectedPermissions" />
-
-    <!-- Разрешение для чтения/кэширования APK при необходимости -->
-    <!-- <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:minSdkVersion="24"
-        android:maxSdkVersion="28" /> -->
-
+    <!--
+        Приложения с лончером, видимые пользователю (Android 11+ и одобрение GooglePlay).
+    -->
     <queries>
-        <!-- Приложения с лончером (видимые пользователю) -->
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
-
-        <!-- Примеры конкретных пакетов, которые можно видеть явно -->
-        <package android:name="com.whatsapp" />
-        <package android:name="com.instagram.android" />
-        <package android:name="com.facebook.katana" />
     </queries>
 
     <application
@@ -46,9 +31,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppSnap">
 
-        <!-- Главная активити -->
         <activity
-            android:name="dev.oniksen.app_snap.presentation.activity.MainActivity"
+            android:name=".presentation.activity.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.AppSnap">
             <intent-filter>
